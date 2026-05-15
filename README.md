@@ -37,7 +37,31 @@ A systematic comparison of:
 
 ---
 
-## Key Results & Insights
+## Key Results & Visualizations
+
+### 1. Dataset Characteristics
+The following chart justifies the dataset selection based on sample size, imbalance ratio, and feature complexity.
+![Dataset Justification](plots_3/dataset_justification.png)
+
+### 2. Preprocessing Pipeline Performance
+Comparison of Accuracy, F1-Score, and PR-AUC across Pipeline A and Pipeline B.
+![Pipeline Comparison](plots_3/pipeline_metrics_comparison.png)
+
+### 3. Generalization & Learning Trajectories (Recognition Dataset)
+Comparison of High Bias (Underfitting) vs. High Variance (Overfitting) as training data scales.
+![Learning Curves](plots_3/Epileptic_Seizure_Recognition_LC_Overfit.png)
+
+### 4. Precision-Recall Tradeoff (Analysis Dataset)
+Visualizing the impact of SMOTE and Class Weighting on model reliability.
+![PR Tradeoff](plots_3/EEG%20Seizure%20Analysis%20Dataset_imbalance_pr_tradeoff.png)
+
+### 5. Final Comparative Summary
+Heatmap of F1-scores across all datasets and experimental conditions.
+![Final Heatmap](plots_3/final_comparative_analysis.png)
+
+---
+
+## Key Insights
 - **Imbalance Handling**: SMOTE consistently provided the highest F1-score gains in high-dimensional datasets (Recognition and Analysis), boosting performance by over 500% in some cases.
 - **Sparsity vs. Stability**: L1 regularization successfully reduced feature counts without significant performance degradation, identifying redundant EEG features.
 - **Learning Trajectory**: Observations across all datasets showed identical performance "shapes" across different fit scenarios, indicating that the intrinsic complexity of the EEG data is the primary performance constraint.
