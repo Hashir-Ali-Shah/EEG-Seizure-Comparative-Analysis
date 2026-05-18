@@ -3,15 +3,22 @@ from sklearn.metrics import accuracy_score, f1_score, precision_recall_curve, au
 from sklearn.model_selection import train_test_split, learning_curve
 from sklearn.impute import SimpleImputer
 import numpy as np
+from imblearn.pipeline import Pipeline as ImbPipeline
+from imblearn.over_sampling import SMOTE
 
 def calculate_pr_auc(y_true, y_prob):
     """Calculates Area Under Precision-Recall Curve."""
     precision, recall, _ = precision_recall_curve(y_true, y_prob)
     return auc(recall, precision)
 
-def train_model(X, y, penalty='l2', C=1.0, solver='lbfgs', class_weight=None):
-    """Trains a Logistic Regression model and returns detailed metrics."""
+def train_model(X, y, penalty='l2', C=1.0, solver='lbfgs', class_weight=None, imbalance_method=None):
+    """Trains a Logistic Regression model and returns detailed metrics with zero data leakage."""
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    
+    # Apply imbalance handling ONLY to the training split to prevent leakage
+    if imbalance_method == 'smote':
+        from imbalance_handler import handle_imbalance
+        X_train, y_train = handle_imbalance(X_train, y_train, method='smote')
     
     # Pre-impute just in case
     imputer = SimpleImputer(strategy='mean')
@@ -37,8 +44,8 @@ def train_model(X, y, penalty='l2', C=1.0, solver='lbfgs', class_weight=None):
     
     return model, metrics
 
-def generate_multi_metric_learning_curve(model, X, y):
-    """Generates learning curve data for F1, Precision, and Recall."""
+def generate_multi_metric_learning_curve(model, X, y, imbalance_method=None):
+    """Generates learning curve data for F1, Precision, and Recall using imblearn Pipeline for CV to prevent leakage."""
     # Pre-impute
     imputer = SimpleImputer(strategy='mean')
     X_imputed = imputer.fit_transform(X)
@@ -46,16 +53,25 @@ def generate_multi_metric_learning_curve(model, X, y):
     metrics = ['f1', 'precision', 'recall']
     results = {}
     
+    if imbalance_method == 'smote':
+        # Wrap in imblearn pipeline to prevent data leakage in CV folds
+        estimator = ImbPipeline([
+            ('smote', SMOTE(random_state=42)),
+            ('classifier', model)
+        ])
+    else:
+        estimator = model
+        
     for metric in metrics:
         train_sizes, train_scores, val_scores = learning_curve(
-            model, X_imputed, y, cv=5, scoring=metric, train_sizes=np.linspace(0.1, 1.0, 5)
+            estimator, X_imputed, y, cv=5, scoring=metric, train_sizes=np.linspace(0.1, 1.0, 5)
         )
         results[metric] = (train_sizes, np.mean(train_scores, axis=1), np.mean(val_scores, axis=1))
     
     return results
 
 def run_regularization_study(X, y):
-    """Compares L1, L2, and Elastic Net regularization."""
+    """Compares L1, L2, and Elastic Net regularization with zero data leakage."""
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
     
     # Impute

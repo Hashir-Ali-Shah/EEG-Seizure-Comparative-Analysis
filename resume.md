@@ -1,0 +1,2 @@
+* Conducted a **comparative analysis** of **Logistic Regression** pipelines on multi-channel **EEG data**, optimizing **L1/L2 Regularization** and **SMOTE** to handle extreme class imbalance.
+* Evaluated **feature extraction** techniques (filtering vs. **PCA**) using **Precision-Recall (PR) curves**, achieving an **82.5%** dimensionality reduction while securing a peak **0.91 F1-score** and **0.94 PR-AUC**.
